@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model sex {
+  id_sex    Int     @id @default(autoincrement())
+  descr_sex String  @db.VarChar(20)
+  abbr_sex  String  @db.Char(1)
+  users     users[]
+}
+
+model user_address {
+  id_user_address  String  @id @db.Uuid
+  cep              String  @db.VarChar(9)
+  number           Int
+  street           String  @db.VarChar(50)
+  neighborhood     String  @db.VarChar(50)
+  complement       String  @db.VarChar(100)
+  city             String  @db.VarChar(100)
+  state            String  @db.VarChar(100)
+  country          String  @db.VarChar(50)
+  selected_address Boolean @default(false)
+  home_address     Boolean @default(false)
+  work_address     Boolean @default(false)
+  id_user          String  @db.Uuid
+  users            users   @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id_user      String         @id @db.Uuid
+  name         String         @db.VarChar(100)
+  last_name    String?        @db.VarChar(100)
+  email        String         @db.VarChar(100)
+  password     String         @db.VarChar(50)
+  active       Boolean?       @default(true)
+  cpf          String?        @db.VarChar(14)
+  cnpj         String?        @db.VarChar(18)
+  date_birth   DateTime?      @db.Date
+  phone_number String?        @db.VarChar(25)
+  role         String[]       @db.VarChar(10)
+  id_sex       Int
+  user_address user_address[]
+  sex          sex            @relation(fields: [id_sex], references: [id_sex], onDelete: NoAction, onUpdate: NoAction)
+}
