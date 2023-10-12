@@ -53,10 +53,10 @@ export class UserController {
 
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles(Role.User, Role.Admin)
-  // @Get(':id')
-  // findOne(@Param('id', ParseIntPipe) id: number) {
-  //   return this.userService.findOne(id)
-  // }
+  @Get(':id_user')
+  findOne(@Param('id_user') idUser: string) {
+    return this.userService.findOne(idUser)
+  }
 
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles(Role.User, Role.Admin)

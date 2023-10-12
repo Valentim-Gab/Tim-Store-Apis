@@ -3,6 +3,8 @@ import { JwtService } from '@nestjs/jwt'
 import { users } from '@prisma/client'
 import { UserService } from 'src/routers/user/user.service'
 import { BCryptService } from '../private/bcrypt.service'
+import { JwtPayload, JwtSign, Payload } from './auth.interface'
+import { JwtCostants } from 'src/constants/JwtConstants'
 
 @Injectable()
 export class AuthService {
@@ -12,26 +14,36 @@ export class AuthService {
     private bcrypt: BCryptService,
   ) {}
 
-  // async validateUser(username: string, pass: string): Promise<any> {
-  //   const user = await this.userService.findByEmail(username)
-  //   if (user && (await this.bcrypt.validatePassword(user.password, pass))) {
-  //     const { password, ...result } = user
+  async validateUser(username: string, pass: string): Promise<any> {
+    const user = await this.userService.findByEmail(username)
+    if (user && (await this.bcrypt.validatePassword(user.password, pass))) {
+      const { password, ...result } = user
 
-  //     return result
-  //   }
-  //   return null
-  // }
+      return result
+    }
+    return null
+  }
 
-  async login(user: users) {
-    // const userPermission = (await this.userService.findOne(user.id)).role
-    // const payload = {
-    //   username: user.email,
-    //   sub: user.id,
-    //   roles: userPermission,
-    // }
+  public jwtSign(data: Payload): JwtSign {
+    const payload: JwtPayload = {
+      sub: data.id_user,
+      username: data.email,
+      role: data.role
+    }
 
-    // return {
-    //   access_token: this.jwtService.sign(payload),
-    // }
+    return {
+      access_token: this.jwtService.sign(payload),
+      refresh_token: this.getRefreshToken(payload.sub)
+    }
+  }
+
+  private getRefreshToken(sub: string): string {
+    return this.jwtService.sign(
+      { sub },
+      {
+        secret: JwtCostants.secretRefresh,
+        expiresIn: '7d'
+      }
+    )
   }
 }

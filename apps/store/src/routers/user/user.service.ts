@@ -61,14 +61,16 @@ export class UserService {
     })
   }
 
-  // async findOne(id: number) {
-  //   return this.performUserOperation('receber', async () => {
-  //     return this.prisma.users.findFirst({
-  //       where: { id },
-  //       select: this.selectedColumns,
-  //     })
-  //   })
-  // }
+  async findOne(idUser: string) {
+    const id_user = idUser
+
+    return this.performUserOperation('receber', async () => {
+      return this.prisma.users.findFirst({
+        where: { id_user },
+        select: this.selectedColumns,
+      })
+    })
+  }
 
   // async findImg(user: users, res: Response) {
   //   user = await this.findOne(user.id)
@@ -82,11 +84,11 @@ export class UserService {
   //   }
   // }
 
-  // findByEmail(email: string) {
-  //   return this.performUserOperation('receber', async () => {
-  //     return this.prisma.users.findFirst({ where: { email } })
-  //   })
-  // }
+  findByEmail(email: string) {
+    return this.performUserOperation('receber', async () => {
+      return this.prisma.users.findFirst({ where: { email } })
+    })
+  }
 
   // async update(id: number, updateUserDto: UpdateUserDto) {
   //   return this.performUserOperation('atualizar', async () => {

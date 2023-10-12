@@ -5,9 +5,10 @@ import { UserModule } from 'src/routers/user/user.module'
 import { PassportModule } from '@nestjs/passport'
 import { JwtModule } from '@nestjs/jwt'
 import { JwtCostants } from 'src/constants/JwtConstants'
-import { LocalStrategy } from './strategy/local.strategy'
-import { JwtStrategy } from './strategy/jwt.strategy'
 import { BCryptService } from '../private/bcrypt.service'
+import { LocalStrategy } from './strategies/local.strategy'
+import { JwtStrategy } from './strategies/jwt.strategy'
+import JwtRefreshStrategy from './strategies/jwt-refresh.stratey'
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { BCryptService } from '../private/bcrypt.service'
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, BCryptService],
+  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy, BCryptService],
 })
 export class AuthModule {}
