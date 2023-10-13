@@ -1,13 +1,21 @@
-import { Controller, Post, UseGuards, Res } from '@nestjs/common'
+import { Controller, Post, UseGuards, Res, Body, UnauthorizedException } from '@nestjs/common'
 import { LocalAuthGuard } from '../guards/local-auth.guard'
 import { AuthService } from './auth.service'
 import { ReqUser } from 'src/decorators/req-user.decorator'
-import { users } from '@prisma/client'
 import { Response } from 'express'
+import { users } from '@prisma/client'
+import { JwtAuthGuard } from '../guards/jwt-auth.guard'
+import { Roles } from 'src/decorators/roles.decorator'
+import { Role } from 'src/enums/Role'
+import { RolesGuard } from '../guards/roles.guard'
+import { UserService } from 'src/routers/user/user.service'
+import { Payload } from './auth.interface'
+import { JwtRefreshGuard } from '../guards/jwt-refresh.guard'
 
 @Controller()
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService,
+    private readonly userService: UserService) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('/login')
@@ -15,5 +23,21 @@ export class AuthController {
     const tokens = this.authService.jwtSign(user)
 
     res.json({ user, tokens })
+  }
+
+  @Post('/refresh')
+  @UseGuards(JwtRefreshGuard)
+  public async refresh(
+    @Res() res: Response,
+    @ReqUser() payload: Payload,
+    @Body('refresh_token') token: string
+  ) {
+    if (!token || !this.authService.validateRefreshToken(payload, token)) {
+      throw new UnauthorizedException('InvalidRefreshToken')
+    }
+
+    const user = await this.userService.findOne(payload.id)
+
+    this.login(res, user)
   }
 }

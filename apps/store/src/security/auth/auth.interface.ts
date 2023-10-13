@@ -12,7 +12,7 @@ export interface JwtPayload {
 }
 
 export interface Payload {
-  id_user: string
-  email: string
+  id: string
+  username: string
   role: string[]
 }

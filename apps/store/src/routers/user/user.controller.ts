@@ -51,12 +51,28 @@ export class UserController {
   //   return this.userService.findOne(user.id)
   // }
 
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(Role.User, Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @Get('/admin')
+  testAdmin() {
+    return '{ "message": "Olá Admin" }'
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User)
+  @Get('/user')
+  testUser() {
+    return '{ "message": "Olá User" }'
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
   @Get(':id_user')
   findOne(@Param('id_user') idUser: string) {
     return this.userService.findOne(idUser)
   }
+
+  
 
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles(Role.User, Role.Admin)

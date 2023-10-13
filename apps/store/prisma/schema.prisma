@@ -36,7 +36,7 @@ model users {
   name         String         @db.VarChar(100)
   last_name    String?        @db.VarChar(100)
   email        String         @db.VarChar(100)
-  password     String         @db.VarChar(50)
+  password     String
   active       Boolean?       @default(true)
   cpf          String?        @db.VarChar(14)
   cnpj         String?        @db.VarChar(18)

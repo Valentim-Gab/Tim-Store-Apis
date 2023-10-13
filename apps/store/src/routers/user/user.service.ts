@@ -10,6 +10,7 @@ import { Response } from 'express'
 import { DefaultImageSaveStrategy } from 'src/utils/image-util/strategies/default-image-save.strategy'
 import { CompressImageSaveStrategy } from 'src/utils/image-util/strategies/compress-image-save.strategy'
 import { v4 as uuidv4 } from 'uuid';
+import { Role } from 'src/enums/Role'
 
 @Injectable()
 export class UserService {
@@ -31,20 +32,17 @@ export class UserService {
     return this.performUserOperation('cadastrar', async () => {
       const id_user = uuidv4();
       const encryptPassword = await this.bcrypt.encryptPassword(createUserDto.password)
-
-      const sex = {
-        id_sex: 1,
-        descr_sex: 'MASCULINO',
-        abbr_sex: 'M'
-      }
+      const sex = createUserDto.sex
 
       const userDto = {
         id_user,
         sex,
         ...createUserDto,
         password: encryptPassword,
-        role: ['admin'],
+        role: [Role.User],
       }
+
+      console.log(userDto)
 
       return this.prisma.users.create({
         data: { ...userDto, sex: { connect: { id_sex: sex.id_sex } }},

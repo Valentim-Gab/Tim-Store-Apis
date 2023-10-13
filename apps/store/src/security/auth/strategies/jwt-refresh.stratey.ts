@@ -9,15 +9,15 @@ export default class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
+      ignoreExpiration: true,
       secretOrKey: JwtCostants.secret,
     })
   }
 
-  validate(payload: JwtPayload): Payload {
+  public validate(payload: JwtPayload): Payload {
     return {
-      id_user: payload.sub,
-      email: payload.username,
+      id: payload.sub,
+      username: payload.username,
       role: payload.role,
     }
   }

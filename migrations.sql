@@ -9,7 +9,7 @@ CREATE TABLE users (
 	name VARCHAR(100) NOT NULL,
 	last_name VARCHAR(100),
 	email VARCHAR(100) NOT NULL,
-	password VARCHAR(50) NOT NULL,
+	password TEXT NOT NULL,
 	active BOOLEAN DEFAULT TRUE,
 	cpf VARCHAR(14),
 	cnpj VARCHAR(18),
