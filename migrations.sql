@@ -5,14 +5,14 @@ CREATE TABLE sex (
 );
 
 CREATE TABLE users (
-	id_user UUID PRIMARY KEY NOT NULL,
+	id_user UUID PRIMARY KEY UNIQUE NOT NULL,
 	name VARCHAR(100) NOT NULL,
 	last_name VARCHAR(100),
-	email VARCHAR(100) NOT NULL,
+	email VARCHAR(100) UNIQUE NOT NULL,
 	password TEXT NOT NULL,
 	active BOOLEAN DEFAULT TRUE,
-	cpf VARCHAR(14),
-	cnpj VARCHAR(18),
+	cpf VARCHAR(14) UNIQUE,
+	cnpj VARCHAR(18) UNIQUE,
 	date_birth DATE,
 	phone_number VARCHAR(25),
 	role varchar(10)[],
@@ -21,7 +21,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE user_address (
-	id_user_address UUID PRIMARY KEY NOT NULL,
+	id_user_address UUID PRIMARY KEY UNIQUE NOT NULL,
 	cep VARCHAR(9) NOT NULL,
 	number int NOT NULL,
 	street VARCHAR(50) NOT NULL,
@@ -41,3 +41,10 @@ INSERT INTO sex (descr_sex, abbr_sex) VALUES
 ('MASCULINO', 'M'),
 ('FEMININO', 'F'),
 ('OUTRO', 'O');
+
+INSERT INTO users (id_user, name, email, password, id_sex, role) VALUES (
+	'dc7fb99a-2f8a-46bb-a915-2a5fa911a155',
+	'adm', 'adm@email.vale',
+	'$2b$10$LKA.RVeztsScuvW0PSfrUOivtcl/UpSZ48RlrnOHAy2IzM9mgutx2',
+	3, ARRAY['admin']
+);

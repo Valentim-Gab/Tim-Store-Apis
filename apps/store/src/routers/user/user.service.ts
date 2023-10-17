@@ -1,15 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { CreateUserDto } from './dto/create-user.dto'
-import { UpdateUserDto } from './dto/update-user.dto'
 import { PrismaService } from 'nestjs-prisma'
 import { BCryptService } from 'src/security/private/bcrypt.service'
-import { Prisma, users } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { ErrorConstants } from 'src/constants/ErrorConstants'
 import { ImageUtil } from 'src/utils/image-util/image.util'
-import { Response } from 'express'
-import { DefaultImageSaveStrategy } from 'src/utils/image-util/strategies/default-image-save.strategy'
-import { CompressImageSaveStrategy } from 'src/utils/image-util/strategies/compress-image-save.strategy'
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid'
 import { Role } from 'src/enums/Role'
 
 @Injectable()
@@ -30,8 +26,10 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto) {
     return this.performUserOperation('cadastrar', async () => {
-      const id_user = uuidv4();
-      const encryptPassword = await this.bcrypt.encryptPassword(createUserDto.password)
+      const id_user = uuidv4()
+      const encryptPassword = await this.bcrypt.encryptPassword(
+        createUserDto.password,
+      )
       const sex = createUserDto.sex
 
       const userDto = {
@@ -45,7 +43,7 @@ export class UserService {
       console.log(userDto)
 
       return this.prisma.users.create({
-        data: { ...userDto, sex: { connect: { id_sex: sex.id_sex } }},
+        data: { ...userDto, sex: { connect: { id_sex: sex.id_sex } } },
         select: this.selectedColumns,
       })
     })
@@ -151,8 +149,8 @@ export class UserService {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === ErrorConstants.UNIQUE_VIOLATED
-      ) {    
-        let uniqueColumn = error.meta.target[0]
+      ) {
+        const uniqueColumn = error.meta.target[0]
         throw new BadRequestException(`Campo ${uniqueColumn} em uso!`)
       }
       console.error(error)
