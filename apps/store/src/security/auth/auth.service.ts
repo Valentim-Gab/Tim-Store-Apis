@@ -30,6 +30,7 @@ export class AuthService {
     })) {
       return false
     }
+    
 
     const { sub } = this.jwtService.decode(refreshToken) as { sub: string }
 
@@ -54,7 +55,7 @@ export class AuthService {
       { sub },
       {
         secret: JwtCostants.secretRefresh,
-        expiresIn: '7d'
+        expiresIn: '60s'
       }
     )
   }
