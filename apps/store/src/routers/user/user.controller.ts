@@ -22,8 +22,8 @@ import { Role } from 'src/enums/Role'
 import { ValidationPipe } from 'src/pipes/validation.pipe'
 import { users } from '@prisma/client'
 import { ReqUser } from 'src/decorators/req-user.decorator'
-import { FileInterceptor } from '@nestjs/platform-express';
-import { File } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express'
+import { File } from 'multer'
 import { Response } from 'express'
 
 @Controller('user')
@@ -72,8 +72,6 @@ export class UserController {
     return this.userService.findOne(idUser)
   }
 
-  
-
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles(Role.User, Role.Admin)
   // @Patch('@me')
@@ -121,5 +119,5 @@ export class UserController {
   // @UseInterceptors(FileInterceptor('image'))
   // uploadImage(@ReqUser() user: users, @UploadedFile() image: File) {
   //   return this.userService.updateImg(image, user)
-  // }  
+  // }
 }

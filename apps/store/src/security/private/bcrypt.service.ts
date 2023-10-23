@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt'
 export class BCryptService {
   async encryptPassword(password: string): Promise<string> {
     const saltOrRounds = 10
+
     return bcrypt.hash(password, saltOrRounds)
   }
 

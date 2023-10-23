@@ -3,8 +3,8 @@ import { JwtService } from '@nestjs/jwt'
 import { users } from '@prisma/client'
 import { UserService } from 'src/routers/user/user.service'
 import { BCryptService } from '../private/bcrypt.service'
-import { JwtPayload, JwtSign, Payload } from './auth.interface'
-import { JwtCostants } from 'src/constants/JwtConstants'
+import { JwtPayload, JwtSign } from './auth.interface'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class AuthService {
@@ -12,15 +12,16 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     private bcrypt: BCryptService,
+    private config: ConfigService,
   ) {}
 
-  async validateUser(username: string, pass: string): Promise<any> {
+  async validateUser(username: string, pass: string): Promise<users> {
     const user = await this.userService.findByEmail(username)
-    if (user && (await this.bcrypt.validatePassword(user.password, pass))) {
-      const { password, ...result } = user
 
-      return result
+    if (user && (await this.bcrypt.validatePassword(user.password, pass))) {
+      return user
     }
+
     return null
   }
 
@@ -28,12 +29,12 @@ export class AuthService {
     const payload: JwtPayload = {
       sub: data.id_user,
       username: data.email,
-      role: data.role
+      role: data.role,
     }
 
     return {
       access_token: this.jwtService.sign(payload),
-      refresh_token: this.getRefreshToken(payload.sub)
+      refresh_token: this.getRefreshToken(payload.sub),
     }
   }
 
@@ -41,9 +42,9 @@ export class AuthService {
     return this.jwtService.sign(
       { sub },
       {
-        secret: JwtCostants.secretRefresh,
-        expiresIn: '60s'
-      }
+        secret: this.config.get('refreshSecret'),
+        expiresIn: '60s',
+      },
     )
   }
 }

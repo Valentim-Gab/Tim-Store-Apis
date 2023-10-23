@@ -4,20 +4,24 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { AuthGuard } from '@nestjs/passport'
 import * as jwt from 'jsonwebtoken'
-import { JwtCostants } from 'src/constants/JwtConstants'
-import { ErrorConstants } from 'src/constants/ErrorConstants'
+import { ErrorConstants } from 'src/constants/error.constant'
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
+  constructor(private config: ConfigService) {
+    super()
+  }
+
   handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     if (err || !user) {
       const token = this.extractTokenFromAuthHeader(context)
 
       if (token) {
         try {
-          jwt.verify(token, JwtCostants.secret)
+          jwt.verify(token, this.config.get('secret'))
         } catch (error) {
           if (error instanceof jwt.TokenExpiredError) {
             throw new ForbiddenException(

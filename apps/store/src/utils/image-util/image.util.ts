@@ -1,14 +1,14 @@
-import { Injectable } from "@nestjs/common";
-import { readdir, unlink, readFile } from "fs-extra";
-import { File } from 'multer';
-import { DefaultImageSaveStrategy } from "./strategies/default-image-save.strategy";
+import { Injectable } from '@nestjs/common'
+import { readdir, unlink, readFile } from 'fs-extra'
+import { File } from 'multer'
+import { DefaultImageSaveStrategy } from './strategies/default-image-save.strategy'
 import * as path from 'path'
-import { ImageSave } from "src/interfaces/image-save.interface";
-import { FileConstants } from "src/constants/FileConstants";
+import { ImageSave } from 'src/interfaces/image-save.interface'
+import { FileConstants } from 'src/constants/file.constant'
 
 @Injectable()
 export class ImageUtil {
-  private readonly rootDirectory = FileConstants.rootDirectory
+  private readonly rootDirectory = FileConstants.ROOT_DIRECTORY
   private saveStrategy: ImageSave
 
   constructor() {
@@ -19,8 +19,12 @@ export class ImageUtil {
     this.saveStrategy = strategy
   }
 
-  async save(multipartFile: File, id: number, lastDir: string): Promise<string> {
-    return this.saveStrategy.save(multipartFile, id, lastDir);
+  async save(
+    multipartFile: File,
+    id: number,
+    lastDir: string,
+  ): Promise<string> {
+    return this.saveStrategy.save(multipartFile, id, lastDir)
   }
 
   async get(imgName: string, lastDir: string) {
@@ -37,7 +41,7 @@ export class ImageUtil {
   async deleteImage(dir: string, id: number): Promise<void> {
     try {
       const files = await readdir(dir)
-      const filesToDelete = files.filter(image => image.includes(`id=${id}`))
+      const filesToDelete = files.filter((image) => image.includes(`id=${id}`))
 
       for (const image of filesToDelete) {
         const imagePath = path.join(dir, image)
@@ -47,4 +51,4 @@ export class ImageUtil {
       console.error('Error deleting images:', error)
     }
   }
-} 
+}

@@ -1,5 +1,14 @@
 import { sex } from '@prisma/client'
-import { IsArray, IsBoolean, IsDate, IsISO8601, IsNotEmpty, IsObject, IsPhoneNumber, IsString } from 'class-validator'
+import {
+  IsArray,
+  IsBoolean,
+  IsDate,
+  IsISO8601,
+  IsNotEmpty,
+  IsObject,
+  IsPhoneNumber,
+  IsString,
+} from 'class-validator'
 
 export class CreateUserDto {
   @IsString()
