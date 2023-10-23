@@ -25,6 +25,7 @@ import { ReqUser } from 'src/decorators/req-user.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { File } from 'multer'
 import { Response } from 'express'
+import { Payload } from 'src/security/auth/auth.interface'
 
 @Controller('user')
 export class UserController {
@@ -44,12 +45,12 @@ export class UserController {
     return this.userService.findAll()
   }
 
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(Role.User, Role.Admin)
-  // @Get('@me')
-  // findOneMe(@ReqUser() user: users) {
-  //   return this.userService.findOne(user.id)
-  // }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User, Role.Admin)
+  @Get('@me')
+  findOneMe(@ReqUser() user: Payload) {
+    return this.userService.findOne(user.id)
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
@@ -72,25 +73,38 @@ export class UserController {
     return this.userService.findOne(idUser)
   }
 
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(Role.User, Role.Admin)
-  // @Patch('@me')
-  // updateMe(
-  //   @ReqUser() user: users,
-  //   @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
-  // ) {
-  //   return this.userService.update(user.id, updateUserDto)
-  // }
+  @Get('email/:email')
+  async findEmail(@Param('email') email: string, @Res() res: Response) {
+    res.json({ email_found: !!(await this.userService.findByEmail(email)) })
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User, Role.Admin)
+  @Patch('@me')
+  updateMe(
+    @ReqUser() user: Payload,
+    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.update(user.id, updateUserDto)
+  }
 
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles(Role.Admin)
-  // @Patch(':id')
-  // update(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
-  // ) {
-  //   return this.userService.update(id, updateUserDto)
-  // }
+  @Patch(':id')
+  update(
+    @Param('id') id_user: string,
+    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.update(id_user, updateUserDto)
+  }
+
+  @Patch(':id/password')
+  updatePassword(
+    @Param('id') id_user: string,
+    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.updatePassword(id_user, updateUserDto.password)
+  }
 
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles(Role.User, Role.Admin)

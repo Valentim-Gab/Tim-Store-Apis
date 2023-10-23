@@ -7,14 +7,21 @@ import { ErrorConstants } from 'src/constants/error.constant'
 import { ImageUtil } from 'src/utils/image-util/image.util'
 import { v4 as uuidv4 } from 'uuid'
 import { Role } from 'src/enums/Role'
+import { UpdateUserDto } from './dto/update-user.dto'
 
 @Injectable()
 export class UserService {
   private selectedColumns = {
     id_user: true,
     name: true,
+    last_name: true,
     email: true,
+    active: true,
+    cnpj: true,
+    date_birth: true,
+    phone_number: true,
     role: true,
+    id_sex: true,
     //img: true,
   }
 
@@ -30,20 +37,16 @@ export class UserService {
       const encryptPassword = await this.bcrypt.encryptPassword(
         createUserDto.password,
       )
-      const sex = createUserDto.sex
 
       const userDto = {
         id_user,
-        sex,
         ...createUserDto,
         password: encryptPassword,
         role: [Role.User],
       }
 
-      console.log(userDto)
-
       return this.prisma.users.create({
-        data: { ...userDto, sex: { connect: { id_sex: sex.id_sex } } },
+        data: { ...userDto, sex: { connect: { id_sex: userDto.sex.id_sex } } },
         select: this.selectedColumns,
       })
     })
@@ -86,24 +89,34 @@ export class UserService {
     })
   }
 
-  // async update(id: number, updateUserDto: UpdateUserDto) {
-  //   return this.performUserOperation('atualizar', async () => {
-  //     const encryptPassword = await this.bcrypt.encryptPassword(
-  //       updateUserDto.password,
-  //     )
-  //     const userDto = {
-  //       ...updateUserDto,
-  //       password: encryptPassword,
-  //       role: ['user'],
-  //     }
+  async update(id_user: string, updateUserDto: UpdateUserDto) {
+    return this.performUserOperation('atualizar', async () => {
+      const { sex, ...userDto } = updateUserDto
 
-  //     return this.prisma.users.update({
-  //       where: { id },
-  //       data: userDto,
-  //       select: this.selectedColumns,
-  //     })
-  //   })
-  // }
+      const data = {
+        ...userDto,
+        ...(sex && { sex: { connect: { id_sex: sex.id_sex } } }),
+      }
+
+      return this.prisma.users.update({
+        where: { id_user },
+        data: data,
+        select: this.selectedColumns,
+      })
+    })
+  }
+
+  async updatePassword(id_user: string, password: string) {
+    return this.performUserOperation('atualizar senha', async () => {
+      const encryptPassword = await this.bcrypt.encryptPassword(password)
+
+      return this.prisma.users.update({
+        where: { id_user },
+        data: { password: encryptPassword },
+        select: this.selectedColumns,
+      })
+    })
+  }
 
   // async updateImg(image: File, user: users) {
   //   const { id } = user
