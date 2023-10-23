@@ -127,11 +127,15 @@ export class UserController {
   //   return this.userService.findImg(user, res)
   // }
 
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(Role.User, Role.Admin)
-  // @Patch('profile_img/@me')
-  // @UseInterceptors(FileInterceptor('image'))
-  // uploadImage(@ReqUser() user: users, @UploadedFile() image: File) {
-  //   return this.userService.updateImg(image, user)
-  // }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User, Role.Admin)
+  @Patch('profile_img/@me')
+  @UseInterceptors(FileInterceptor('image'))
+  uploadImage(@ReqUser() user: Payload, @UploadedFile() image: File) {
+    console.log(user)
+
+    console.log(image)
+
+    //return this.userService.updateImg(image, user)
+  }
 }
