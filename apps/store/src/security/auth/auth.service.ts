@@ -24,19 +24,6 @@ export class AuthService {
     return null
   }
 
-  public validateRefreshToken(data: Payload, refreshToken: string): boolean {
-    if (!this.jwtService.verify(refreshToken, {
-      secret: JwtCostants.secretRefresh
-    })) {
-      return false
-    }
-    
-
-    const { sub } = this.jwtService.decode(refreshToken) as { sub: string }
-
-    return sub === data.id
-  }
-
   public jwtSign(data: users): JwtSign {
     const payload: JwtPayload = {
       sub: data.id_user,
