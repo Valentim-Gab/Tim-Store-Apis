@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   UseGuards,
-  ParseIntPipe,
   UploadedFile,
   UseInterceptors,
   Res,
@@ -20,7 +19,6 @@ import { RolesGuard } from 'src/security/guards/roles.guard'
 import { Roles } from 'src/decorators/roles.decorator'
 import { Role } from 'src/enums/Role'
 import { ValidationPipe } from 'src/pipes/validation.pipe'
-import { users } from '@prisma/client'
 import { ReqUser } from 'src/decorators/req-user.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { File } from 'multer'
@@ -69,8 +67,8 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Get(':id_user')
-  findOne(@Param('id_user') idUser: string) {
-    return this.userService.findOne(idUser)
+  findOne(@Param('id_user') userId: string) {
+    return this.userService.findOne(userId)
   }
 
   @Get('email/:email')
@@ -92,50 +90,46 @@ export class UserController {
   // @Roles(Role.Admin)
   @Patch(':id')
   update(
-    @Param('id') id_user: string,
+    @Param('id') userId: string,
     @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
   ) {
-    return this.userService.update(id_user, updateUserDto)
+    return this.userService.update(userId, updateUserDto)
   }
 
   @Patch(':id/password')
   updatePassword(
-    @Param('id') id_user: string,
+    @Param('id') userId: string,
     @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
   ) {
-    return this.userService.updatePassword(id_user, updateUserDto.password)
+    return this.userService.updatePassword(userId, updateUserDto.password)
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User, Role.Admin)
+  @Delete('@me')
+  deleteMe(@ReqUser() user: Payload) {
+    return this.userService.delete(user.id)
   }
 
   // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(Role.User, Role.Admin)
-  // @Delete('@me')
-  // deleteMe(@ReqUser() user: users) {
-  //   return this.userService.delete(user.id)
-  // }
-
-  // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles(Role.Admin)
-  // @Delete(':id')
-  // delete(@Param('id', ParseIntPipe) id: number) {
-  //   return this.userService.delete(id)
-  // }
+  @Delete(':id')
+  delete(@Param('id') userId: string) {
+    return this.userService.delete(userId)
+  }
 
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(Role.User, Role.Admin)
-  // @Get('profile_img/@me')
-  // downloadImage(@ReqUser() user: users, @Res() res: Response) {
-  //   return this.userService.findImg(user, res)
-  // }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User, Role.Admin)
+  @Get('profile_img/@me')
+  downloadImage(@ReqUser() user: Payload, @Res() res: Response) {
+    return this.userService.findImg(user, res)
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.User, Role.Admin)
   @Patch('profile_img/@me')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileInterceptor('profile_img'))
   uploadImage(@ReqUser() user: Payload, @UploadedFile() image: File) {
-    console.log(user)
-
-    console.log(image)
-
-    //return this.userService.updateImg(image, user)
+    return this.userService.updateImg(image, user)
   }
 }

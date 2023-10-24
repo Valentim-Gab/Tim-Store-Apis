@@ -3,8 +3,9 @@ import { readdir, unlink, readFile } from 'fs-extra'
 import { File } from 'multer'
 import { DefaultImageSaveStrategy } from './strategies/default-image-save.strategy'
 import * as path from 'path'
-import { ImageSave } from 'src/interfaces/image-save.interface'
+import { ImageSave } from 'src/utils/image-util/image-save.interface'
 import { FileConstants } from 'src/constants/file.constant'
+import { existsSync } from 'fs'
 
 @Injectable()
 export class ImageUtil {
@@ -21,7 +22,7 @@ export class ImageUtil {
 
   async save(
     multipartFile: File,
-    id: number,
+    id: string,
     lastDir: string,
   ): Promise<string> {
     return this.saveStrategy.save(multipartFile, id, lastDir)
@@ -38,14 +39,19 @@ export class ImageUtil {
     }
   }
 
-  async deleteImage(dir: string, id: number): Promise<void> {
+  async deleteImage(dir: string, id: string): Promise<void> {
     try {
-      const files = await readdir(dir)
-      const filesToDelete = files.filter((image) => image.includes(`id=${id}`))
+      if (existsSync(dir)) {
+        const files = await readdir(dir)
+        const filesToDelete = files.filter((image) =>
+          image.includes(`id=${id}`),
+        )
 
-      for (const image of filesToDelete) {
-        const imagePath = path.join(dir, image)
-        await unlink(imagePath)
+        for (const image of filesToDelete) {
+          const imagePath = path.join(dir, image)
+
+          await unlink(imagePath)
+        }
       }
     } catch (error) {
       console.error('Error deleting images:', error)

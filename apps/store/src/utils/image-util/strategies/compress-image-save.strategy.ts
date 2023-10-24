@@ -6,7 +6,7 @@ import { extname } from 'path'
 import { ImageUtil } from '../image.util'
 import { exec } from 'child_process'
 import { Injectable } from '@nestjs/common'
-import { ImageSave } from 'src/interfaces/image-save.interface'
+import { ImageSave } from 'src/utils/image-util/image-save.interface'
 import { FileConstants } from 'src/constants/file.constant'
 
 @Injectable()
@@ -17,7 +17,7 @@ export class CompressImageSaveStrategy implements ImageSave {
 
   async save(
     multipartFile: File,
-    id: number,
+    id: string,
     lastDir: string,
   ): Promise<string> {
     const dir = `${this.rootDirectory}/${lastDir}`

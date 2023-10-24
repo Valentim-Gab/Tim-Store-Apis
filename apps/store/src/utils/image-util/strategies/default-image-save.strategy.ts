@@ -4,7 +4,7 @@ import { createWriteStream } from 'fs'
 import { ensureDir } from 'fs-extra'
 import { File } from 'multer'
 import { extname } from 'path'
-import { ImageSave } from 'src/interfaces/image-save.interface'
+import { ImageSave } from 'src/utils/image-util/image-save.interface'
 import { ImageUtil } from '../image.util'
 import { FileConstants } from 'src/constants/file.constant'
 
@@ -16,7 +16,7 @@ export class DefaultImageSaveStrategy implements ImageSave {
 
   async save(
     multipartFile: File,
-    id: number,
+    id: string,
     lastDir: string,
   ): Promise<string> {
     const dir = `${this.rootDirectory}/${lastDir}`
