@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  tim-store-api:
+    build: ./apps/store
+    container_name: tim-store-api
+    ports:
+      - '3001:3001'
+    depends_on:
+      - postgres
+    networks:
+      - pg_network
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: tim-store
+    ports:
+      - 5433:5432
+    networks:
+      - pg_network
+
+networks:
+  pg_network:
+    driver: bridge

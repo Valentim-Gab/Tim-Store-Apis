@@ -16,6 +16,7 @@ CREATE TABLE users (
 	date_birth DATE,
 	phone_number VARCHAR(25),
 	role varchar(10)[],
+	profile_image TEXT,
 	id_sex INT NOT NULL,
 	FOREIGN KEY (id_sex) REFERENCES sex (id_sex)
 );

@@ -1,0 +1,22 @@
+FROM node:latest
+
+WORKDIR /app
+
+RUN npm i -g pnpm@latest
+RUN npm i -g prisma@latest
+
+COPY package*.json ./
+
+RUN pnpm i
+
+COPY . .
+
+RUN echo "DATABASE_URL=postgresql://postgres:1234@tim-store-apis-postgres-1:5432/tim-store" > .env
+
+RUN prisma generate
+
+COPY --chown=node:node . .
+
+EXPOSE 3001
+
+CMD [ "pnpm", "run", "dev" ]
