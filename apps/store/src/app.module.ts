@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config'
 import configuration from './config/configuration'
 import { UploadModule } from './routers/upload/upload.module'
 // import { PropertyModule } from './routers/property/property.module';
+import { SupabaseModule } from './connections/supabase/supabase.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UploadModule } from './routers/upload/upload.module'
       load: [configuration],
     }),
     UploadModule,
+    SupabaseModule,
   ],
 })
 export class AppModule {}

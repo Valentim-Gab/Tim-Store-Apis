@@ -4,4 +4,5 @@ export const ErrorConstants = {
   UNAUTHENTICATED: 'unauthenticated',
   INVALID_TOKEN: 'invalid_token',
   FILE_UPLOAD_ERROR: 'file_upload_error',
+  FILE_DOWNLOAD_ERROR: 'file_download_error',
 }
