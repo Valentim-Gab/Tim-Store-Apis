@@ -21,7 +21,6 @@ import { Role } from 'src/enums/Role'
 import { ValidationPipe } from 'src/pipes/validation.pipe'
 import { ReqUser } from 'src/decorators/req-user.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { File } from 'multer'
 import { Response } from 'express'
 import { Payload } from 'src/security/auth/auth.interface'
 
@@ -129,7 +128,10 @@ export class UserController {
   @Roles(Role.User, Role.Admin)
   @Patch('profile_img/@me')
   @UseInterceptors(FileInterceptor('profile_img'))
-  uploadImage(@ReqUser() user: Payload, @UploadedFile() image: File) {
+  uploadImage(
+    @ReqUser() user: Payload,
+    @UploadedFile() image: Express.Multer.File,
+  ) {
     return this.userService.updateImg(image, user)
   }
 }

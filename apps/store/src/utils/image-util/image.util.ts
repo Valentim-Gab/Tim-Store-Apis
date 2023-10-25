@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { readdir, unlink, readFile } from 'fs-extra'
-import { File } from 'multer'
 import { DefaultImageSaveStrategy } from './strategies/default-image-save.strategy'
 import * as path from 'path'
 import { ImageSave } from 'src/utils/image-util/image-save.interface'
@@ -21,7 +20,7 @@ export class ImageUtil {
   }
 
   async save(
-    multipartFile: File,
+    multipartFile: Express.Multer.File,
     id: string,
     lastDir: string,
   ): Promise<string> {

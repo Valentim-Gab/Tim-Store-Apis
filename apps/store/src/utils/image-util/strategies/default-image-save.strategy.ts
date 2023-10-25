@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { randomUUID } from 'crypto'
 import { createWriteStream } from 'fs'
 import { ensureDir } from 'fs-extra'
-import { File } from 'multer'
 import { extname } from 'path'
 import { ImageSave } from 'src/utils/image-util/image-save.interface'
 import { ImageUtil } from '../image.util'
@@ -15,7 +14,7 @@ export class DefaultImageSaveStrategy implements ImageSave {
   constructor(private imageUtil: ImageUtil) {}
 
   async save(
-    multipartFile: File,
+    multipartFile: Express.Multer.File,
     id: string,
     lastDir: string,
   ): Promise<string> {

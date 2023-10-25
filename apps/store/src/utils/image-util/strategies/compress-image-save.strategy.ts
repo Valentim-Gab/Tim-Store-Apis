@@ -1,7 +1,6 @@
 import { randomUUID } from 'crypto'
 import { createWriteStream } from 'fs'
 import { ensureDir } from 'fs-extra'
-import { File } from 'multer'
 import { extname } from 'path'
 import { ImageUtil } from '../image.util'
 import { exec } from 'child_process'
@@ -16,7 +15,7 @@ export class CompressImageSaveStrategy implements ImageSave {
   constructor(private imageUtil: ImageUtil) {}
 
   async save(
-    multipartFile: File,
+    multipartFile: Express.Multer.File,
     id: string,
     lastDir: string,
   ): Promise<string> {

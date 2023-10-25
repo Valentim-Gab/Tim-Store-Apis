@@ -130,7 +130,19 @@ export class UserService {
     }
   }
 
-  async updateImg(image: File, user: Payload) {
+  async uploadProfileImage(filename: string, user: Payload) {
+    const userId = user.id
+
+    return this.performUserOperation('atualizar', async () => {
+      return this.prisma.users.update({
+        where: { id_user: userId },
+        data: { profile_image: filename },
+        select: this.selectedColumns,
+      })
+    })
+  }
+
+  async updateImg(image: Express.Multer.File, user: Payload) {
     const userId = user.id
     const strategy =
       image.size > 1_000_000

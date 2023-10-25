@@ -4,6 +4,7 @@ import { AuthModule } from './security/auth/auth.module'
 import { PrismaModule } from 'nestjs-prisma'
 import { ConfigModule } from '@nestjs/config'
 import configuration from './config/configuration'
+import { UploadModule } from './routers/upload/upload.module'
 // import { PropertyModule } from './routers/property/property.module';
 
 @Module({
@@ -15,6 +16,7 @@ import configuration from './config/configuration'
       isGlobal: true,
       load: [configuration],
     }),
+    UploadModule,
   ],
 })
 export class AppModule {}
