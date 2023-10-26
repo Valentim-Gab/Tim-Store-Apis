@@ -5,4 +5,5 @@ export const ErrorConstants = {
   INVALID_TOKEN: 'invalid_token',
   FILE_UPLOAD_ERROR: 'file_upload_error',
   FILE_DOWNLOAD_ERROR: 'file_download_error',
+  FILE_DELETE_ERROR: 'file_delete_error',
 }

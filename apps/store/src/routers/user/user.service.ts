@@ -8,10 +8,13 @@ import { ImageUtil } from 'src/utils/image-util/image.util'
 import { v4 as uuidv4 } from 'uuid'
 import { Role } from 'src/enums/Role'
 import { UpdateUserDto } from './dto/update-user.dto'
-import { CompressImageSaveStrategy } from 'src/utils/image-util/strategies/compress-image-save.strategy'
-import { DefaultImageSaveStrategy } from 'src/utils/image-util/strategies/default-image-save.strategy'
 import { Payload } from 'src/security/auth/auth.interface'
 import { Response } from 'express'
+import { extname } from 'path'
+import { ConfigService } from '@nestjs/config'
+import { SupabaseService } from 'src/connections/supabase/supabase.service'
+import { File } from 'src/interfaces/file.interface'
+import { StorageResult } from 'src/interfaces/supabase.interface'
 
 @Injectable()
 export class UserService {
@@ -33,6 +36,8 @@ export class UserService {
     private prisma: PrismaService,
     private bcrypt: BCryptService,
     private imageUtil: ImageUtil,
+    private config: ConfigService,
+    private supabaseService: SupabaseService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -130,33 +135,93 @@ export class UserService {
     }
   }
 
-  async uploadProfileImage(filename: string, user: Payload) {
-    const userId = user.id
+  // async updateImg(image: Express.Multer.File, user: Payload) {
+  //   const userId = user.id
+  //   const strategy =
+  //     image.size > 1_000_000
+  //       ? new CompressImageSaveStrategy(this.imageUtil)
+  //       : new DefaultImageSaveStrategy(this.imageUtil)
+
+  //   this.imageUtil.setSaveStrategy(strategy)
+
+  //   const filename = await this.imageUtil.save(image, userId, 'user')
+
+  //   return this.performUserOperation('atualizar', async () => {
+  //     return this.prisma.users.update({
+  //       where: { id_user: userId },
+  //       data: { profile_image: filename },
+  //       select: this.selectedColumns,
+  //     })
+  //   })
+  // }
+
+  async uploadProfileImage(file: File, user: Payload): Promise<StorageResult> {
+    const supabase = this.supabaseService.createClientSupabase()
+
+    const filename = `id=${user.id}+image=profile-img${extname(
+      file.originalname,
+    )}`
+
+    const result = await supabase.storage
+      .from(this.config.get('bucketUserProfileImages'))
+      .upload(filename, file.buffer, {
+        upsert: true,
+      })
+
+    if (result.error) {
+      throw new BadRequestException(
+        'Erro no upload de imagem',
+        ErrorConstants.FILE_UPLOAD_ERROR,
+      )
+    }
 
     return this.performUserOperation('atualizar', async () => {
       return this.prisma.users.update({
-        where: { id_user: userId },
+        where: { id_user: user.id },
         data: { profile_image: filename },
         select: this.selectedColumns,
       })
     })
   }
 
-  async updateImg(image: Express.Multer.File, user: Payload) {
-    const userId = user.id
-    const strategy =
-      image.size > 1_000_000
-        ? new CompressImageSaveStrategy(this.imageUtil)
-        : new DefaultImageSaveStrategy(this.imageUtil)
+  async downloadProfileImage(user: Payload): Promise<string> {
+    const supabase = this.supabaseService.createClientSupabase()
+    const userDB: users = await this.findOne(user.id)
+    const expiresIn: number = 60 * 60 * 24 * 7 //1 week
 
-    this.imageUtil.setSaveStrategy(strategy)
+    const result = await supabase.storage
+      .from(this.config.get('bucketUserProfileImages'))
+      .createSignedUrl(userDB.profile_image, expiresIn)
 
-    const filename = await this.imageUtil.save(image, userId, 'user')
+    if (result.error) {
+      throw new BadRequestException(
+        'Erro no download',
+        ErrorConstants.FILE_DOWNLOAD_ERROR,
+      )
+    }
+
+    return result.data.signedUrl
+  }
+
+  async deleteProfileImage(user: Payload) {
+    const supabase = this.supabaseService.createClientSupabase()
+    const userDB: users = await this.findOne(user.id)
+
+    const result = await supabase.storage
+      .from(this.config.get('bucketUserProfileImages'))
+      .remove([userDB.profile_image])
+
+    if (result.error) {
+      throw new BadRequestException(
+        'Erro ao deletar imagem',
+        ErrorConstants.FILE_DELETE_ERROR,
+      )
+    }
 
     return this.performUserOperation('atualizar', async () => {
       return this.prisma.users.update({
-        where: { id_user: userId },
-        data: { profile_image: filename },
+        where: { id_user: user.id },
+        data: { profile_image: null },
         select: this.selectedColumns,
       })
     })

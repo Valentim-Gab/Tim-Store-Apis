@@ -23,6 +23,7 @@ import { ReqUser } from 'src/decorators/req-user.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { Response } from 'express'
 import { Payload } from 'src/security/auth/auth.interface'
+import { File } from 'src/interfaces/file.interface'
 
 @Controller('user')
 export class UserController {
@@ -33,6 +34,17 @@ export class UserController {
     const user = this.userService.create(createUserDto)
 
     return user
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User, Role.Admin)
+  @Post('profile-image')
+  @UseInterceptors(FileInterceptor('profile-image'))
+  async uploadProfileImage(
+    @UploadedFile() file: File,
+    @ReqUser() user: Payload,
+  ) {
+    return await this.userService.uploadProfileImage(file, user)
   }
 
   // @UseGuards(JwtAuthGuard, RolesGuard)
@@ -51,16 +63,26 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
-  @Get('/admin')
+  @Get('admin')
   testAdmin() {
     return '{ "message": "Olá Admin" }'
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.User)
-  @Get('/user')
+  @Get('user')
   testUser() {
     return '{ "message": "Olá User" }'
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User, Role.Admin)
+  @Get('profile-image')
+  @UseInterceptors()
+  async downloadProfileImage(@ReqUser() user: Payload, @Res() res: Response) {
+    const profileImage = await this.userService.downloadProfileImage(user)
+
+    res.json({ profile_image: profileImage })
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -110,6 +132,17 @@ export class UserController {
     return this.userService.delete(user.id)
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User, Role.Admin)
+  @Delete('profile-image')
+  @UseInterceptors(FileInterceptor('profile-image'))
+  async deleteProfileImage(
+    @UploadedFile() file: File,
+    @ReqUser() user: Payload,
+  ) {
+    return await this.userService.deleteProfileImage(user)
+  }
+
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles(Role.Admin)
   @Delete(':id')
@@ -117,21 +150,21 @@ export class UserController {
     return this.userService.delete(userId)
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.User, Role.Admin)
-  @Get('profile_img/@me')
-  downloadImage(@ReqUser() user: Payload, @Res() res: Response) {
-    return this.userService.findImg(user, res)
-  }
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.User, Role.Admin)
+  // @Get('profile_img/@me')
+  // downloadImage(@ReqUser() user: Payload, @Res() res: Response) {
+  //   return this.userService.findImg(user, res)
+  // }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.User, Role.Admin)
-  @Patch('profile_img/@me')
-  @UseInterceptors(FileInterceptor('profile_img'))
-  uploadImage(
-    @ReqUser() user: Payload,
-    @UploadedFile() image: Express.Multer.File,
-  ) {
-    return this.userService.updateImg(image, user)
-  }
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.User, Role.Admin)
+  // @Patch('profile_img/@me')
+  // @UseInterceptors(FileInterceptor('profile_img'))
+  // uploadImage(
+  //   @ReqUser() user: Payload,
+  //   @UploadedFile() image: Express.Multer.File,
+  // ) {
+  //   return this.userService.updateImg(image, user)
+  // }
 }
