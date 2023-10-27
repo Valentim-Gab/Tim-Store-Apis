@@ -16,8 +16,6 @@ export class UserAddressService {
 
   async create(createUserAddressDto: CreateUserAddressDto, user: users) {
     if (!(await this.viacep.isValidCep(createUserAddressDto.zip_code))) {
-      console.log('ah')
-
       throw new BadRequestException(
         'Cep inválido',
         ErrorConstants.INVALID_ZIP_CODE,
