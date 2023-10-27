@@ -7,16 +7,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model sex {
-  id_sex    Int     @id @default(autoincrement())
-  descr_sex String  @db.VarChar(20)
-  abbr_sex  String  @db.Char(1)
-  users     users[]
-}
-
 model user_address {
   id_user_address  String  @id @db.Uuid
-  cep              String  @db.VarChar(9)
+  zip_code         String  @db.VarChar(9)
   number           Int
   street           String  @db.VarChar(50)
   neighborhood     String  @db.VarChar(50)
@@ -28,11 +21,10 @@ model user_address {
   home_address     Boolean @default(false)
   work_address     Boolean @default(false)
   id_user          String  @db.Uuid
-  users            users   @relation(fields: [id_user], references: [id_user], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model users {
-  id_user       String         @id @db.Uuid
+  id            String         @id @unique @db.Uuid
   name          String         @db.VarChar(100)
   last_name     String?        @db.VarChar(100)
   email         String         @unique @db.VarChar(100)
@@ -43,8 +35,101 @@ model users {
   date_birth    DateTime?      @db.Date
   phone_number  String?        @db.VarChar(25)
   role          String[]       @db.VarChar(10)
-  id_sex        Int
   profile_image String?
-  user_address  user_address[]
-  sex           sex            @relation(fields: [id_sex], references: [id_sex], onDelete: NoAction, onUpdate: NoAction)
+  id_gender     Int
+  product_sale  product_sale[]
+  gender        gender         @relation(fields: [id_gender], references: [id_gender], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model product {
+  id_product                String                      @id @db.Uuid
+  name                      String                      @db.VarChar(100)
+  description               String
+  units                     Int                         @default(1)
+  price                     Decimal                     @db.Money
+  main_image                String?
+  images                    String[]
+  numeric_size              Int?
+  id_product_brand          Int?
+  id_product_size           Int
+  id_product_color          Int?
+  product_brand             product_brand?              @relation(fields: [id_product_brand], references: [id_product_brand], onDelete: NoAction, onUpdate: NoAction)
+  product_color             product_color?              @relation(fields: [id_product_color], references: [id_product_color], onDelete: NoAction, onUpdate: NoAction)
+  product_size              product_size                @relation(fields: [id_product_size], references: [id_product_size], onDelete: NoAction, onUpdate: NoAction)
+  product_category_relation product_category_relation[]
+  product_sale              product_sale[]
+}
+
+model product_brand {
+  id_product_brand Int       @id @default(autoincrement())
+  name             String    @db.VarChar(50)
+  product          product[]
+}
+
+model product_color {
+  id_product_color Int       @id @default(autoincrement())
+  name             String    @db.VarChar(30)
+  hexadecimal_code String?   @db.VarChar(10)
+  product          product[]
+}
+
+model product_sale {
+  id_product_sale Int     @id @default(autoincrement())
+  units           Int     @default(1)
+  total_value     Decimal @db.Money
+  id_product      String  @db.Uuid
+  id_user         String  @db.Uuid
+  product         product @relation(fields: [id_product], references: [id_product], onDelete: NoAction, onUpdate: NoAction)
+  users           users   @relation(fields: [id_user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model product_size {
+  id_product_size Int       @id @default(autoincrement())
+  name            String?   @db.VarChar(5)
+  product         product[]
+}
+
+model product_subcategory {
+  id_product_subcategory Int                   @id @default(autoincrement())
+  name                   String                @db.VarChar(100)
+  categories_relation    categories_relation[]
+}
+
+model categories_relation {
+  id_categories_relation           Int                           @id @default(autoincrement())
+  description                      String                        @db.VarChar(100)
+  id_product_main_category         Int
+  id_product_intermediate_category Int
+  id_product_subcategory           Int
+  product_intermediate_category    product_intermediate_category @relation(fields: [id_product_intermediate_category], references: [id_product_intermediate_category], onDelete: NoAction, onUpdate: NoAction)
+  product_main_category            product_main_category         @relation(fields: [id_product_main_category], references: [id_product_main_category], onDelete: NoAction, onUpdate: NoAction)
+  product_subcategory              product_subcategory           @relation(fields: [id_product_subcategory], references: [id_product_subcategory], onDelete: NoAction, onUpdate: NoAction)
+  product_category_relation        product_category_relation[]
+}
+
+model gender {
+  id_gender    Int     @id @default(autoincrement())
+  name         String  @db.VarChar(20)
+  abbreviation String  @db.Char(1)
+  users        users[]
+}
+
+model product_category_relation {
+  id_product_category_relation Int                 @id @default(autoincrement())
+  id_categories_relation       Int
+  id_product                   String              @db.Uuid
+  categories_relation          categories_relation @relation(fields: [id_categories_relation], references: [id_categories_relation], onDelete: NoAction, onUpdate: NoAction)
+  product                      product             @relation(fields: [id_product], references: [id_product], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model product_intermediate_category {
+  id_product_intermediate_category Int                   @id @default(autoincrement())
+  name                             String                @db.VarChar(100)
+  categories_relation              categories_relation[]
+}
+
+model product_main_category {
+  id_product_main_category Int                   @id @default(autoincrement())
+  name                     String                @db.VarChar(100)
+  categories_relation      categories_relation[]
 }

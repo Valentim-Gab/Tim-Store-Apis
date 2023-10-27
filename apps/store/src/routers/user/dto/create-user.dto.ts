@@ -1,4 +1,4 @@
-import { sex } from '@prisma/client'
+import { gender } from '@prisma/client'
 import {
   IsArray,
   IsBoolean,
@@ -48,5 +48,5 @@ export class CreateUserDto {
 
   @IsObject()
   @IsNotEmpty()
-  sex: sex
+  gender: gender
 }

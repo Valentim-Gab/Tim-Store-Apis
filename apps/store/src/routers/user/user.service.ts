@@ -8,7 +8,6 @@ import { ImageUtil } from 'src/utils/image-util/image.util'
 import { v4 as uuidv4 } from 'uuid'
 import { Role } from 'src/enums/Role'
 import { UpdateUserDto } from './dto/update-user.dto'
-import { Payload } from 'src/security/auth/auth.interface'
 import { Response } from 'express'
 import { extname } from 'path'
 import { ConfigService } from '@nestjs/config'
@@ -19,7 +18,7 @@ import { StorageResult } from 'src/interfaces/supabase.interface'
 @Injectable()
 export class UserService {
   private selectedColumns = {
-    id_user: true,
+    id: true,
     name: true,
     last_name: true,
     email: true,
@@ -28,7 +27,7 @@ export class UserService {
     date_birth: true,
     phone_number: true,
     role: true,
-    id_sex: true,
+    gender: true,
     profile_image: true,
   }
 
@@ -47,14 +46,17 @@ export class UserService {
       )
 
       const userDto = {
-        id_user: uuidv4(),
+        id: uuidv4(),
         ...createUserDto,
         password: encryptPassword,
         role: [Role.User],
       }
 
       return this.prisma.users.create({
-        data: { ...userDto, sex: { connect: { id_sex: userDto.sex.id_sex } } },
+        data: {
+          ...userDto,
+          gender: { connect: { id_gender: userDto.gender.id_gender } },
+        },
         select: this.selectedColumns,
       })
     })
@@ -71,7 +73,7 @@ export class UserService {
   async findOne(idUser: string) {
     return this.performUserOperation('receber', async () => {
       return this.prisma.users.findFirst({
-        where: { id_user: idUser },
+        where: { id: idUser },
         select: this.selectedColumns,
       })
     })
@@ -85,15 +87,15 @@ export class UserService {
 
   async update(idUser: string, updateUserDto: UpdateUserDto) {
     return this.performUserOperation('atualizar', async () => {
-      const { sex, ...userDto } = updateUserDto
+      const { gender, ...userDto } = updateUserDto
 
       const data = {
         ...userDto,
-        ...(sex && { sex: { connect: { id_sex: sex.id_sex } } }),
+        ...(gender && { sex: { connect: { id_gender: gender.id_gender } } }),
       }
 
       return this.prisma.users.update({
-        where: { id_user: idUser },
+        where: { id: idUser },
         data: data,
         select: this.selectedColumns,
       })
@@ -105,7 +107,7 @@ export class UserService {
       const encryptPassword = await this.bcrypt.encryptPassword(password)
 
       return this.prisma.users.update({
-        where: { id_user: idUser },
+        where: { id: idUser },
         data: { password: encryptPassword },
         select: this.selectedColumns,
       })
@@ -115,14 +117,14 @@ export class UserService {
   async delete(userId: string) {
     return this.performUserOperation('deletar', async () => {
       return this.prisma.users.update({
-        where: { id_user: userId },
+        where: { id: userId },
         data: { active: false },
         select: this.selectedColumns,
       })
     })
   }
 
-  async findImg(user: Payload, res: Response) {
+  async findImg(user: users, res: Response) {
     const userDB: users = await this.findOne(user.id)
 
     try {
@@ -155,7 +157,7 @@ export class UserService {
   //   })
   // }
 
-  async uploadProfileImage(file: File, user: Payload): Promise<StorageResult> {
+  async uploadProfileImage(file: File, user: users): Promise<StorageResult> {
     const supabase = this.supabaseService.createClientSupabase()
 
     const filename = `id=${user.id}+image=profile-img${extname(
@@ -177,14 +179,14 @@ export class UserService {
 
     return this.performUserOperation('atualizar', async () => {
       return this.prisma.users.update({
-        where: { id_user: user.id },
+        where: { id: user.id },
         data: { profile_image: filename },
         select: this.selectedColumns,
       })
     })
   }
 
-  async downloadProfileImage(user: Payload): Promise<string> {
+  async downloadProfileImage(user: users): Promise<string> {
     const supabase = this.supabaseService.createClientSupabase()
     const userDB: users = await this.findOne(user.id)
     const expiresIn: number = 60 * 60 * 24 * 7 //1 week
@@ -203,7 +205,7 @@ export class UserService {
     return result.data.signedUrl
   }
 
-  async deleteProfileImage(user: Payload) {
+  async deleteProfileImage(user: users) {
     const supabase = this.supabaseService.createClientSupabase()
     const userDB: users = await this.findOne(user.id)
 
@@ -220,7 +222,7 @@ export class UserService {
 
     return this.performUserOperation('atualizar', async () => {
       return this.prisma.users.update({
-        where: { id_user: user.id },
+        where: { id: user.id },
         data: { profile_image: null },
         select: this.selectedColumns,
       })

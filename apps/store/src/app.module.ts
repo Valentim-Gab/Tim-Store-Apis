@@ -5,6 +5,7 @@ import { PrismaModule } from 'nestjs-prisma'
 import { ConfigModule } from '@nestjs/config'
 import configuration from './config/configuration'
 import { SupabaseModule } from './connections/supabase/supabase.module'
+import { UserAddressModule } from './routers/user-address/user-address.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SupabaseModule } from './connections/supabase/supabase.module'
       load: [configuration],
     }),
     SupabaseModule,
+    UserAddressModule,
   ],
 })
 export class AppModule {}

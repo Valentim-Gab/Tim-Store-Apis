@@ -22,8 +22,8 @@ import { ValidationPipe } from 'src/pipes/validation.pipe'
 import { ReqUser } from 'src/decorators/req-user.decorator'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { Response } from 'express'
-import { Payload } from 'src/security/auth/auth.interface'
 import { File } from 'src/interfaces/file.interface'
+import { users } from '@prisma/client'
 
 @Controller('user')
 export class UserController {
@@ -40,10 +40,7 @@ export class UserController {
   @Roles(Role.User, Role.Admin)
   @Post('profile-image')
   @UseInterceptors(FileInterceptor('profile-image'))
-  async uploadProfileImage(
-    @UploadedFile() file: File,
-    @ReqUser() user: Payload,
-  ) {
+  async uploadProfileImage(@UploadedFile() file: File, @ReqUser() user: users) {
     return await this.userService.uploadProfileImage(file, user)
   }
 
@@ -57,7 +54,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.User, Role.Admin)
   @Get('@me')
-  findOneMe(@ReqUser() user: Payload) {
+  findOneMe(@ReqUser() user: users) {
     return this.userService.findOne(user.id)
   }
 
@@ -79,7 +76,7 @@ export class UserController {
   @Roles(Role.User, Role.Admin)
   @Get('profile-image')
   @UseInterceptors()
-  async downloadProfileImage(@ReqUser() user: Payload, @Res() res: Response) {
+  async downloadProfileImage(@ReqUser() user: users, @Res() res: Response) {
     const profileImage = await this.userService.downloadProfileImage(user)
 
     res.json({ profile_image: profileImage })
@@ -101,7 +98,7 @@ export class UserController {
   @Roles(Role.User, Role.Admin)
   @Patch('@me')
   updateMe(
-    @ReqUser() user: Payload,
+    @ReqUser() user: users,
     @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
   ) {
     return this.userService.update(user.id, updateUserDto)
@@ -128,18 +125,14 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.User, Role.Admin)
   @Delete('@me')
-  deleteMe(@ReqUser() user: Payload) {
+  deleteMe(@ReqUser() user: users) {
     return this.userService.delete(user.id)
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.User, Role.Admin)
   @Delete('profile-image')
-  @UseInterceptors(FileInterceptor('profile-image'))
-  async deleteProfileImage(
-    @UploadedFile() file: File,
-    @ReqUser() user: Payload,
-  ) {
+  async deleteProfileImage(@ReqUser() user: users) {
     return await this.userService.deleteProfileImage(user)
   }
 
@@ -153,7 +146,7 @@ export class UserController {
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles(Role.User, Role.Admin)
   // @Get('profile_img/@me')
-  // downloadImage(@ReqUser() user: Payload, @Res() res: Response) {
+  // downloadImage(@ReqUser() user: users, @Res() res: Response) {
   //   return this.userService.findImg(user, res)
   // }
 
@@ -162,7 +155,7 @@ export class UserController {
   // @Patch('profile_img/@me')
   // @UseInterceptors(FileInterceptor('profile_img'))
   // uploadImage(
-  //   @ReqUser() user: Payload,
+  //   @ReqUser() user: users,
   //   @UploadedFile() image: Express.Multer.File,
   // ) {
   //   return this.userService.updateImg(image, user)

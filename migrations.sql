@@ -5,7 +5,7 @@ CREATE TABLE gender (
 );
 
 CREATE TABLE users (
-	id_user UUID PRIMARY KEY UNIQUE NOT NULL,
+	id UUID PRIMARY KEY UNIQUE NOT NULL,
 	name VARCHAR(100) NOT NULL,
 	last_name VARCHAR(100),
 	email VARCHAR(100) UNIQUE NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE users (
 
 CREATE TABLE user_address (
 	id_user_address UUID PRIMARY KEY UNIQUE NOT NULL,
-	cep VARCHAR(9) NOT NULL,
+	zip_code VARCHAR(9) NOT NULL,
 	number int NOT NULL,
 	street VARCHAR(50) NOT NULL,
 	neighborhood VARCHAR(50) NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE user_address (
 	home_address BOOLEAN NOT NULL DEFAULT FALSE,
 	work_address BOOLEAN NOT NULL DEFAULT FALSE,
 	id_user UUID NOT NULL,
-	FOREIGN KEY (id_user) REFERENCES users (id_user)
+	FOREIGN KEY (id_user) REFERENCES users (id)
 );
 
 /* Exemplo: Nike; Adidas; Mizuno. */
@@ -79,12 +79,12 @@ CREATE TABLE product_subcategory (
 CREATE TABLE categories_relation (
   id_categories_relation SERIAL PRIMARY KEY,
   description VARCHAR(100) NOT NULL,
-  id_main_category INTEGER NOT NULL,
-  id_intermediate_category INTEGER NOT NULL,
-  id_subcategory INTEGER NOT NULL,
+  id_product_main_category INTEGER NOT NULL,
+  id_product_intermediate_category INTEGER NOT NULL,
+  id_product_subcategory INTEGER NOT NULL,
   FOREIGN KEY (id_product_main_category) REFERENCES product_main_category (id_product_main_category),
   FOREIGN KEY (id_product_intermediate_category) REFERENCES product_intermediate_category (id_product_intermediate_category),
-  FOREIGN KEY (id_subcategory) REFERENCES subcategory (id_subcategory)
+  FOREIGN KEY (id_product_subcategory) REFERENCES product_subcategory (id_product_subcategory)
 );
 
 /* Exemplo: Vestido Curto */
@@ -121,7 +121,7 @@ CREATE TABLE product_sale (
   id_product UUID NOT NULL,
   id_user UUID NOT NULL,
   FOREIGN KEY (id_product) REFERENCES product (id_product),
-  FOREIGN KEY (id_user) REFERENCES users (id_user)
+  FOREIGN KEY (id_user) REFERENCES users (id)
 );
 
 
@@ -130,7 +130,7 @@ CREATE TABLE product_sale (
 INSERT INTO gender (name, abbreviation) VALUES
 ('MASCULINO', 'M'), ('FEMININO', 'F'), ('OUTRO', 'O');
 
-INSERT INTO users (id_user, name, email, password, id_sex, role) VALUES (
+INSERT INTO users (id name, email, password, id_gender, role) VALUES (
 	'dc7fb99a-2f8a-46bb-a915-2a5fa911a155',
 	'adm', 'adm@email.vale',
 	'$2b$10$LKA.RVeztsScuvW0PSfrUOivtcl/UpSZ48RlrnOHAy2IzM9mgutx2',
@@ -156,4 +156,3 @@ INSERT INTO product_color (name, hexadecimal_code) VALUES
 ('Preto', '#000000'),
 ('Branco', '#FFFFFF'),
 ('Cinza', '#808080');
-
