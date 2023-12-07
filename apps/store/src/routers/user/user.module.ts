@@ -5,6 +5,7 @@ import { PrismaService } from 'nestjs-prisma'
 import { BCryptService } from 'src/security/private/bcrypt.service'
 import { ImageUtil } from 'src/utils/image-util/image.util'
 import { SupabaseService } from 'src/connections/supabase/supabase.service'
+import { PrismaUtil } from 'src/utils/prisma.util'
 
 @Module({
   controllers: [UserController],
@@ -14,6 +15,7 @@ import { SupabaseService } from 'src/connections/supabase/supabase.service'
     BCryptService,
     ImageUtil,
     SupabaseService,
+    PrismaUtil,
   ],
   exports: [UserService],
 })

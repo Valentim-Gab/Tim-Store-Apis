@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { CreateUserDto } from './dto/create-user.dto'
 import { PrismaService } from 'nestjs-prisma'
 import { BCryptService } from 'src/security/private/bcrypt.service'
-import { Prisma, users } from '@prisma/client'
+import { users } from '@prisma/client'
 import { ErrorConstants } from 'src/constants/error.constant'
 import { ImageUtil } from 'src/utils/image-util/image.util'
 import { v4 as uuidv4 } from 'uuid'
@@ -14,6 +14,7 @@ import { ConfigService } from '@nestjs/config'
 import { SupabaseService } from 'src/connections/supabase/supabase.service'
 import { File } from 'src/interfaces/file.interface'
 import { StorageResult } from 'src/interfaces/supabase.interface'
+import { PrismaUtil } from 'src/utils/prisma.util'
 
 @Injectable()
 export class UserService {
@@ -37,91 +38,113 @@ export class UserService {
     private imageUtil: ImageUtil,
     private config: ConfigService,
     private supabaseService: SupabaseService,
+    private prismaUtil: PrismaUtil,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    return this.performUserOperation('cadastrar', async () => {
-      const encryptPassword = await this.bcrypt.encryptPassword(
-        createUserDto.password,
-      )
+    return this.prismaUtil.performOperation(
+      'Não foi possível cadastrar usuário',
+      async () => {
+        const encryptPassword = await this.bcrypt.encryptPassword(
+          createUserDto.password,
+        )
 
-      const userDto = {
-        id: uuidv4(),
-        ...createUserDto,
-        password: encryptPassword,
-        role: [Role.User],
-      }
+        const userDto = {
+          id: uuidv4(),
+          ...createUserDto,
+          password: encryptPassword,
+          role: [Role.User],
+        }
 
-      return this.prisma.users.create({
-        data: {
-          ...userDto,
-          gender: { connect: { id_gender: userDto.gender.id_gender } },
-        },
-        select: this.selectedColumns,
-      })
-    })
+        return this.prisma.users.create({
+          data: {
+            ...userDto,
+            gender: { connect: { id_gender: userDto.gender.id_gender } },
+          },
+          select: this.selectedColumns,
+        })
+      },
+    )
   }
 
   async findAll() {
-    return this.performUserOperation('receber', async () => {
-      return await this.prisma.users.findMany({
-        select: this.selectedColumns,
-      })
-    })
+    return this.prismaUtil.performOperation(
+      'Não foi possível buscar pelos usuários',
+      async () => {
+        return await this.prisma.users.findMany({
+          select: this.selectedColumns,
+        })
+      },
+    )
   }
 
   async findOne(idUser: string) {
-    return this.performUserOperation('receber', async () => {
-      return this.prisma.users.findFirst({
-        where: { id: idUser },
-        select: this.selectedColumns,
-      })
-    })
+    return this.prismaUtil.performOperation(
+      'Não foi possível buscar pelo usuário',
+      async () => {
+        return this.prisma.users.findFirst({
+          where: { id: idUser },
+          select: this.selectedColumns,
+        })
+      },
+    )
   }
 
   findByEmail(email: string) {
-    return this.performUserOperation('receber', async () => {
-      return this.prisma.users.findFirst({ where: { email } })
-    })
+    return this.prismaUtil.performOperation(
+      'Não foi possível buscar pelo usuário',
+      async () => {
+        return this.prisma.users.findFirst({ where: { email } })
+      },
+    )
   }
 
   async update(idUser: string, updateUserDto: UpdateUserDto) {
-    return this.performUserOperation('atualizar', async () => {
-      const { gender, ...userDto } = updateUserDto
+    return this.prismaUtil.performOperation(
+      'Não foi porrível atualizar o usuário',
+      async () => {
+        const { gender, ...userDto } = updateUserDto
 
-      const data = {
-        ...userDto,
-        ...(gender && { sex: { connect: { id_gender: gender.id_gender } } }),
-      }
+        const data = {
+          ...userDto,
+          ...(gender && { sex: { connect: { id_gender: gender.id_gender } } }),
+        }
 
-      return this.prisma.users.update({
-        where: { id: idUser },
-        data: data,
-        select: this.selectedColumns,
-      })
-    })
+        return this.prisma.users.update({
+          where: { id: idUser },
+          data: data,
+          select: this.selectedColumns,
+        })
+      },
+    )
   }
 
   async updatePassword(idUser: string, password: string) {
-    return this.performUserOperation('atualizar senha', async () => {
-      const encryptPassword = await this.bcrypt.encryptPassword(password)
+    return this.prismaUtil.performOperation(
+      'Não foi possível atualizar a senha do usuário',
+      async () => {
+        const encryptPassword = await this.bcrypt.encryptPassword(password)
 
-      return this.prisma.users.update({
-        where: { id: idUser },
-        data: { password: encryptPassword },
-        select: this.selectedColumns,
-      })
-    })
+        return this.prisma.users.update({
+          where: { id: idUser },
+          data: { password: encryptPassword },
+          select: this.selectedColumns,
+        })
+      },
+    )
   }
 
   async delete(userId: string) {
-    return this.performUserOperation('deletar', async () => {
-      return this.prisma.users.update({
-        where: { id: userId },
-        data: { active: false },
-        select: this.selectedColumns,
-      })
-    })
+    return this.prismaUtil.performOperation(
+      'Não foi possível deletar o usuário',
+      async () => {
+        return this.prisma.users.update({
+          where: { id: userId },
+          data: { active: false },
+          select: this.selectedColumns,
+        })
+      },
+    )
   }
 
   async findImg(user: users, res: Response) {
@@ -148,7 +171,7 @@ export class UserService {
 
   //   const filename = await this.imageUtil.save(image, userId, 'user')
 
-  //   return this.performUserOperation('atualizar', async () => {
+  //   return this.prismaUtil.performOperation('atualizar', async () => {
   //     return this.prisma.users.update({
   //       where: { id_user: userId },
   //       data: { profile_image: filename },
@@ -177,13 +200,16 @@ export class UserService {
       )
     }
 
-    return this.performUserOperation('atualizar', async () => {
-      return this.prisma.users.update({
-        where: { id: user.id },
-        data: { profile_image: filename },
-        select: this.selectedColumns,
-      })
-    })
+    return this.prismaUtil.performOperation(
+      'Não foi possível atualizar a imagem do usuário',
+      async () => {
+        return this.prisma.users.update({
+          where: { id: user.id },
+          data: { profile_image: filename },
+          select: this.selectedColumns,
+        })
+      },
+    )
   }
 
   async downloadProfileImage(user: users): Promise<string> {
@@ -220,33 +246,15 @@ export class UserService {
       )
     }
 
-    return this.performUserOperation('atualizar', async () => {
-      return this.prisma.users.update({
-        where: { id: user.id },
-        data: { profile_image: null },
-        select: this.selectedColumns,
-      })
-    })
-  }
-
-  private async performUserOperation(
-    action: string,
-    operation: () => Promise<any>,
-  ) {
-    try {
-      return await this.prisma.$transaction(async () => {
-        return await operation()
-      })
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === ErrorConstants.UNIQUE_VIOLATED
-      ) {
-        const uniqueColumn = error.meta.target[0]
-        throw new BadRequestException(`Campo ${uniqueColumn} em uso!`)
-      }
-      console.error(error)
-      throw new BadRequestException(`Erro ao ${action} o usuário`)
-    }
+    return this.prismaUtil.performOperation(
+      'Não foi possível deletar a imagem do usuário',
+      async () => {
+        return this.prisma.users.update({
+          where: { id: user.id },
+          data: { profile_image: null },
+          select: this.selectedColumns,
+        })
+      },
+    )
   }
 }

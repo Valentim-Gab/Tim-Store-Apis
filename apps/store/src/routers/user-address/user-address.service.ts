@@ -2,16 +2,18 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { CreateUserAddressDto } from './dto/create-user-address.dto'
 import { UpdateUserAddressDto } from './dto/update-user-address.dto'
 import { PrismaService } from 'nestjs-prisma'
-import { Prisma, users } from '@prisma/client'
+import { users } from '@prisma/client'
 import { ErrorConstants } from 'src/constants/error.constant'
 import { v4 as uuidv4 } from 'uuid'
 import { ViacepService } from 'src/connections/viacep/viacep.service'
+import { PrismaUtil } from 'src/utils/prisma.util'
 
 @Injectable()
 export class UserAddressService {
   constructor(
     private prisma: PrismaService,
     private viacep: ViacepService,
+    private prismaUtil: PrismaUtil,
   ) {}
 
   async create(createUserAddressDto: CreateUserAddressDto, user: users) {
@@ -22,55 +24,78 @@ export class UserAddressService {
       )
     }
 
-    return this.performUserOperation('cadastrar', async () => {
-      const addressDto = {
-        id_user_address: uuidv4(),
-        ...createUserAddressDto,
-        id_user: user.id,
-      }
+    return this.prismaUtil.performOperation(
+      'Não foi possível cadastrar endereço de usuário',
+      async () => {
+        const addressDto = {
+          id_user_address: uuidv4(),
+          ...createUserAddressDto,
+          id_user: user.id,
+        }
 
-      return this.prisma.user_address.create({ data: addressDto })
-    })
+        return this.prisma.user_address.create({ data: addressDto })
+      },
+    )
   }
 
   findAll() {
-    return `This action returns all userAddress`
+    return this.prismaUtil.performOperation(
+      'Não foi possível buscar os endereços',
+      async () => {
+        return this.prisma.user_address.findMany()
+      },
+    )
   }
 
   findAllByUser(user: users) {
-    return `This action returns all userAddress: ${user}`
+    return this.prismaUtil.performOperation(
+      'Não foi possível buscar os endereços',
+      async () => {
+        return this.prisma.user_address.findMany({
+          where: { id_user: user.id },
+        })
+      },
+    )
   }
 
   findOne(id: string) {
-    return `This action returns a #${id} userAddress`
+    return this.prismaUtil.performOperation(
+      'Não foi possível busca o endereço',
+      async () => {
+        return this.prisma.user_address.findFirst({
+          where: { id_user_address: id },
+        })
+      },
+    )
   }
 
-  update(id: string, updateUserAddressDto: UpdateUserAddressDto) {
-    return `This action updates a #${id} userAddress: ${updateUserAddressDto}`
+  async update(id: string, updateUserAddressDto: UpdateUserAddressDto) {
+    if (!(await this.viacep.isValidCep(updateUserAddressDto.zip_code))) {
+      throw new BadRequestException(
+        'Cep inválido',
+        ErrorConstants.INVALID_ZIP_CODE,
+      )
+    }
+
+    return this.prismaUtil.performOperation(
+      'Não foi possível atualizar o endereço',
+      async () => {
+        return this.prisma.user_address.update({
+          where: { id_user_address: id },
+          data: updateUserAddressDto,
+        })
+      },
+    )
   }
 
   remove(id: string) {
-    return `This action removes a #${id} userAddress`
-  }
-
-  private async performUserOperation(
-    action: string,
-    operation: () => Promise<any>,
-  ) {
-    try {
-      return await this.prisma.$transaction(async () => {
-        return await operation()
-      })
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === ErrorConstants.UNIQUE_VIOLATED
-      ) {
-        const uniqueColumn = error.meta.target[0]
-        throw new BadRequestException(`Campo ${uniqueColumn} em uso!`)
-      }
-      console.error(error)
-      throw new BadRequestException(`Erro ao ${action} o endereço de usuário`)
-    }
+    return this.prismaUtil.performOperation(
+      'Não foi possível remover o endereço',
+      async () => {
+        return this.prisma.user_address.delete({
+          where: { id_user_address: id },
+        })
+      },
+    )
   }
 }
