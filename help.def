@@ -1,0 +1,2 @@
+nest g module Stripe
+npm i --save stripe

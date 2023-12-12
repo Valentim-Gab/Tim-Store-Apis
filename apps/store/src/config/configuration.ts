@@ -5,4 +5,6 @@ export default () => ({
   supabaseKEY: process.env.SUPABASE_KEY,
   bucketGeralImages: 'tim-store-images',
   bucketUserProfileImages: 'user-profile-images',
+  stripeApiKey: process.env.STRIPE_API_KEY,
+  defaultApiUrl: 'http://localhost:3001',
 })

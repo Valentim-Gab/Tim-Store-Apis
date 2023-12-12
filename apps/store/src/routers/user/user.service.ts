@@ -13,7 +13,7 @@ import { extname } from 'path'
 import { ConfigService } from '@nestjs/config'
 import { SupabaseService } from 'src/connections/supabase/supabase.service'
 import { File } from 'src/interfaces/file.interface'
-import { StorageResult } from 'src/interfaces/supabase.interface'
+import { StorageResult } from 'src/connections/supabase/supabase.interface'
 import { PrismaUtil } from 'src/utils/prisma.util'
 
 @Injectable()

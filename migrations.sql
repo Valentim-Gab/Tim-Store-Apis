@@ -156,3 +156,12 @@ INSERT INTO product_color (name, hexadecimal_code) VALUES
 ('Preto', '#000000'),
 ('Branco', '#FFFFFF'),
 ('Cinza', '#808080');
+
+INSERT INTO product_main_category (name) VALUES
+('Másculino'), ('Feminino'), ('Unissex'), ('Infantil'), ('Esporte/Academia');
+
+INSERT INTO product_intermediate_category (name) VALUES
+('Calçados'), ('Roupas'), ('Acessórios'), ('Esporte');
+
+INSERT INTO product_subcategory (name) VALUES
+('Botas'), ('Tênis'), ('Camisas'), ('Vestidos');
