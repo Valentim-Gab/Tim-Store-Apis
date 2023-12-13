@@ -19,14 +19,18 @@ export class StripeService {
     const defaultApiUrl = this.config.get('defaultApiUrl')
 
     return await this.stripe.checkout.sessions.create({
-      line_items: [{ price: 'price_1OMWeVJZmap0pLS4wmGBQRF4', quantity: 3 }],
+      line_items: [{ price: 'price_1OMsdHJZmap0pLS49Yv1Erwz', quantity: 3 }],
       mode: 'payment',
       payment_intent_data: {
         setup_future_usage: 'on_session',
       },
-      customer: 'cus_PAsGx3bWajmYMI',
+      customer: 'cus_PBF0VDAuacukea',
       success_url: `${defaultApiUrl}/pay/success/checkout/session?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${defaultApiUrl}/pay/failed/checkout/session`,
     })
+  }
+
+  async successSession(session) {
+    console.log(session)
   }
 }
