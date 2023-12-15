@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { MODULE_OPTIONS_TOKEN } from './stripe.module.builder'
 import { StripeModuleOptions } from './stripe.interface'
 import { ConfigService } from '@nestjs/config'
+import { Cart } from './cart.interface'
 
 @Injectable()
 export class StripeService {
@@ -32,5 +33,18 @@ export class StripeService {
 
   async successSession(session) {
     console.log(session)
+  }
+
+  checkout(cartList: Cart[]) {
+    const totalPrice = cartList.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0,
+    )
+
+    return this.stripe.paymentIntents.create({
+      amount: totalPrice * 100,
+      currency: 'brl',
+      payment_method_types: ['card'],
+    })
   }
 }

@@ -1,5 +1,6 @@
-import { Controller, Post, Get, Res } from '@nestjs/common'
+import { Controller, Post, Get, Res, Body } from '@nestjs/common'
 import { StripeService } from './stripe.service'
+import { Cart } from './cart.interface'
 
 @Controller('stripe')
 export class StripeController {
@@ -8,6 +9,11 @@ export class StripeController {
   @Post()
   async pay() {
     return await this.stripeService.pay()
+  }
+
+  @Post('checkout')
+  async checkout(@Body() body: { cart_list: Cart[] }) {
+    return this.stripeService.checkout(body.cart_list)
   }
 
   @Get('pay/success/checkout/session')
