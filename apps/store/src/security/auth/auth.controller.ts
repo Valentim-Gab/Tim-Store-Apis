@@ -21,25 +21,31 @@ export class AuthController {
   public login(@Res() res: Response, @ReqUser() user: users) {
     const tokens = this.authService.jwtSign(user)
 
-    res.cookie('refresh_token', tokens.refresh_token, {
-      httpOnly: true,
-      secure: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days,
-    })
+    // res.cookie('refresh_token', tokens.refresh_token, {
+    //   httpOnly: true,
+    //   secure: true,
+    //   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days,
+    //   path: '/',
+    // })
 
-    res.cookie('access_token', tokens.access_token, {
-      httpOnly: true,
-      secure: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days,
-    })
+    // res.cookie('access_token', tokens.access_token, {
+    //   httpOnly: true,
+    //   secure: true,
+    //   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days,
+    //   path: '/',
+    // })
 
-    res.json(user)
+    console.log('Bateu')
+
+    res.json({ user, tokens })
   }
 
   @Post('/refresh')
   @UseGuards(JwtRefreshGuard)
   public async refresh(@Res() res: Response, @ReqUser() payload: Payload) {
     const user = await this.userService.findOne(payload.id)
+
+    res.cookie('teste', 'Value', { path: '/' })
 
     this.login(res, user)
   }
@@ -50,8 +56,18 @@ export class AuthController {
     @ReqUser() user: users,
     @Cookies('access_token') token: string,
   ) {
-    console.log(res.cookie)
+    console.log(token)
 
     return res.json(user)
+  }
+
+  @Get('/logout')
+  public logout(@Res() res: Response, @Cookies('access_token') token: string) {
+    console.log(token)
+
+    res.clearCookie('refresh_token', { path: '/' })
+    res.clearCookie('access_token', { path: '/' })
+
+    res.json({ message: 'Logout' })
   }
 }
