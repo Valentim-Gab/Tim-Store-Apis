@@ -45,7 +45,7 @@ export class UserService {
     return this.prismaUtil.performOperation(
       'Não foi possível cadastrar usuário',
       async () => {
-        const encryptPassword = await this.bcrypt.encryptPassword(
+        const encryptPassword = await this.bcrypt.encrypt(
           createUserDto.password,
         )
 
@@ -123,7 +123,7 @@ export class UserService {
     return this.prismaUtil.performOperation(
       'Não foi possível atualizar a senha do usuário',
       async () => {
-        const encryptPassword = await this.bcrypt.encryptPassword(password)
+        const encryptPassword = await this.bcrypt.encrypt(password)
 
         return this.prisma.users.update({
           where: { id: idUser },

@@ -35,16 +35,24 @@ export class StripeService {
     console.log(session)
   }
 
-  checkout(cartList: Cart[]) {
+  async checkout(cartList: Cart[]) {
     const totalPrice = cartList.reduce(
       (acc, item) => acc + item.price * item.quantity,
       0,
     )
 
-    return this.stripe.paymentIntents.create({
+    const paymentIntent = await this.stripe.paymentIntents.create({
       amount: totalPrice * 100,
       currency: 'brl',
       payment_method_types: ['card', 'boleto'],
     })
+
+    return {
+      paymentIntentId: paymentIntent.id,
+    }
+  }
+
+  getPayment(id: string) {
+    return this.stripe.paymentIntents.retrieve(id)
   }
 }

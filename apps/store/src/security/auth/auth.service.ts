@@ -18,7 +18,7 @@ export class AuthService {
   async validateUser(username: string, pass: string): Promise<users> {
     const user = await this.userService.findByEmail(username)
 
-    if (user && (await this.bcrypt.validatePassword(user.password, pass))) {
+    if (user && (await this.bcrypt.validate(user.password, pass))) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user
 
