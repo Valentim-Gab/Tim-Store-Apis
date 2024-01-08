@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Res, Body } from '@nestjs/common'
+import { Controller, Post, Get, Res, Body, Param } from '@nestjs/common'
 import { StripeService } from './stripe.service'
 import { Cart } from './cart.interface'
 
@@ -19,5 +19,10 @@ export class StripeController {
   @Get('pay/success/checkout/session')
   paymentSuccess(@Res({ passthrough: true }) res) {
     return this.stripeService.successSession(res)
+  }
+
+  @Get('pay/:id')
+  getPayment(@Param('id') id: string) {
+    return this.stripeService.getPayment(id)
   }
 }
