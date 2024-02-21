@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Res, Get } from '@nestjs/common'
+import { Controller, Post, UseGuards, Res, Get, Headers } from '@nestjs/common'
 import { LocalAuthGuard } from '../guards/local-auth.guard'
 import { AuthService } from './auth.service'
 import { ReqUser } from 'src/decorators/req-user.decorator'
@@ -8,6 +8,10 @@ import { UserService } from 'src/routers/user/user.service'
 import { Payload } from './auth.interface'
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard'
 import { Cookies } from 'src/decorators/cookies.decorator'
+import { Roles } from 'src/decorators/roles.decorator'
+import { Role } from 'src/enums/Role'
+import { JwtAuthGuard } from '../guards/jwt-auth.guard'
+import { RolesGuard } from '../guards/roles.guard'
 
 @Controller()
 export class AuthController {
@@ -35,8 +39,6 @@ export class AuthController {
     //   path: '/',
     // })
 
-    console.log('Bateu')
-
     res.json({ user, tokens })
   }
 
@@ -44,8 +46,6 @@ export class AuthController {
   @UseGuards(JwtRefreshGuard)
   public async refresh(@Res() res: Response, @ReqUser() payload: Payload) {
     const user = await this.userService.findOne(payload.id)
-
-    res.cookie('teste', 'Value', { path: '/' })
 
     this.login(res, user)
   }
@@ -55,8 +55,23 @@ export class AuthController {
     @Res() res: Response,
     @ReqUser() user: users,
     @Cookies('access_token') token: string,
+    @Headers('authorization') auth: string,
   ) {
-    console.log(token)
+    console.log(auth)
+
+    return res.json(user)
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User, Role.Admin)
+  @Post('/test')
+  public testPost(
+    @Res() res: Response,
+    @ReqUser() user: users,
+    @Cookies('access_token') token: string,
+    @Headers('authorization') auth: string,
+  ) {
+    console.log('DEU CERTO!')
 
     return res.json(user)
   }

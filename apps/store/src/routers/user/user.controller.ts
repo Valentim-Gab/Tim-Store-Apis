@@ -44,8 +44,8 @@ export class UserController {
     return await this.userService.uploadProfileImage(file, user)
   }
 
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
   @Get()
   findAll() {
     return this.userService.findAll()
