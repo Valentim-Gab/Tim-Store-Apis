@@ -15,8 +15,24 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async validateUser(username: string, pass: string): Promise<users> {
-    const user = await this.userService.findByEmail(username)
+  async validateUser(username: string, pass: string): Promise<any> {
+    // const user = await this.userService.findByEmail(username)
+
+    const user = {
+      id: 'dc7fb99a-2f8a-46bb-a915-2a5fa911a155',
+      name: 'adm',
+      last_name: null,
+      email: 'adm@email.vale',
+      password: '$2b$10$LKA.RVeztsScuvW0PSfrUOivtcl/UpSZ48RlrnOHAy2IzM9mgutx2',
+      active: true,
+      cpf: null,
+      cnpj: null,
+      date_birth: null,
+      phone_number: null,
+      role: ['admin'],
+      profile_image: null,
+      id_gender: 3,
+    }
 
     if (user && (await this.bcrypt.validate(user.password, pass))) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

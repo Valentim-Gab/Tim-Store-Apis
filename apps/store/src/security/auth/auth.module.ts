@@ -31,5 +31,6 @@ import { ConfigService } from '@nestjs/config'
     JwtRefreshStrategy,
     BCryptService,
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}

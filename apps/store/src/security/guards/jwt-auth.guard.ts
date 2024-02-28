@@ -8,22 +8,53 @@ import { ConfigService } from '@nestjs/config'
 import { AuthGuard } from '@nestjs/passport'
 import * as jwt from 'jsonwebtoken'
 import { ErrorConstants } from 'src/constants/error.constant'
+import { AuthService } from '../auth/auth.service'
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private config: ConfigService) {
+  constructor(
+    private config: ConfigService,
+    private authService: AuthService,
+  ) {
     super()
   }
 
   handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     if (err || !user) {
-      const token = this.extractTokenFromAuthHeader(context)
+      let token = this.extractTokenFromAuthHeader(context)
+
+      if (!token) {
+        token = this.extractTokenFromCookies(context)
+
+        if (token) {
+          const decodedToken = jwt.decode(token, this.config.get('secret'))
+
+          user = {
+            id: decodedToken.sub,
+            username: decodedToken.username,
+            role: decodedToken.role,
+          }
+        }
+      }
 
       if (token) {
         try {
           jwt.verify(token, this.config.get('secret'))
         } catch (error) {
           if (error instanceof jwt.TokenExpiredError) {
+            // if (!this.extractTokenFromAuthHeader(context)) {
+            //   const response = context.switchToHttp().getResponse()
+            //   const tokens = this.authService.jwtSign(user)
+
+            //   response.cookies.access_token = tokens.access_token
+            //   response.cookies.refresh_token = tokens.refresh_token
+            //   response.cookies.session = tokens.access_token
+
+            //   console.log('REFRESHED')
+
+            //   return response
+            // }
+
             throw new ForbiddenException(
               'Sessão expirada',
               ErrorConstants.SESSION_EXPIRED,
@@ -54,5 +85,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     return null
+  }
+
+  private extractTokenFromCookies(context: ExecutionContext): string {
+    const request = context.switchToHttp().getRequest()
+    const token = request.cookies.access_token ?? null
+
+    return token
   }
 }

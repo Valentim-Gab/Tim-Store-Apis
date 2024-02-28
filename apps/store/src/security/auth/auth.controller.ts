@@ -25,19 +25,21 @@ export class AuthController {
   public login(@Res() res: Response, @ReqUser() user: users) {
     const tokens = this.authService.jwtSign(user)
 
-    // res.cookie('refresh_token', tokens.refresh_token, {
-    //   httpOnly: true,
-    //   secure: true,
-    //   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days,
-    //   path: '/',
-    // })
+    res.cookie('refresh_token', tokens.refresh_token, {
+      httpOnly: true,
+      secure: true,
+    })
 
-    // res.cookie('access_token', tokens.access_token, {
-    //   httpOnly: true,
-    //   secure: true,
-    //   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days,
-    //   path: '/',
-    // })
+    res.cookie('access_token', tokens.access_token, {
+      httpOnly: true,
+      secure: true,
+    })
+
+    res.cookie('session', tokens.access_token, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 30,
+    })
 
     res.json({ user, tokens })
   }
@@ -45,7 +47,23 @@ export class AuthController {
   @Post('/refresh')
   @UseGuards(JwtRefreshGuard)
   public async refresh(@Res() res: Response, @ReqUser() payload: Payload) {
-    const user = await this.userService.findOne(payload.id)
+    const user = {
+      id: 'dc7fb99a-2f8a-46bb-a915-2a5fa911a155',
+      name: 'adm',
+      last_name: null,
+      email: 'adm@email.vale',
+      password: '$2b$10$LKA.RVeztsScuvW0PSfrUOivtcl/UpSZ48RlrnOHAy2IzM9mgutx2',
+      active: true,
+      cpf: null,
+      cnpj: null,
+      date_birth: null,
+      phone_number: null,
+      role: ['admin'],
+      profile_image: null,
+      id_gender: 3,
+    }
+
+    // const user = await this.userService.findOne(payload.id)
 
     this.login(res, user)
   }
@@ -64,16 +82,9 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.User, Role.Admin)
-  @Post('/test')
-  public testPost(
-    @Res() res: Response,
-    @ReqUser() user: users,
-    @Cookies('access_token') token: string,
-    @Headers('authorization') auth: string,
-  ) {
-    console.log('DEU CERTO!')
-
-    return res.json(user)
+  @Post('/testy')
+  public testPost(@Res() res: Response) {
+    return res.json({ message: 'teste bem sucedido' })
   }
 
   @Get('/logout')

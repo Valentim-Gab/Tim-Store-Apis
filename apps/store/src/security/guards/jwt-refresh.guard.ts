@@ -17,8 +17,30 @@ export class JwtRefreshGuard extends AuthGuard('jwt-refresh') {
 
   handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     if (err || !user) {
-      const refreshToken = this.extractRefreshTokenFromBody(context)
-      const accessToken = this.extractTokenFromAuthHeader(context)
+      let refreshToken = this.extractRefreshTokenFromBody(context)
+      let accessToken = this.extractTokenFromAuthHeader(context)
+
+      if (!accessToken && !refreshToken) {
+        const tokens = this.extractTokensFromCookies(context)
+
+        console.log(tokens)
+
+        refreshToken = tokens.refresh_token ?? null
+        accessToken = tokens.access_token ?? null
+
+        if (accessToken) {
+          const decodedToken = jwt.decode(
+            accessToken,
+            this.config.get('secret'),
+          )
+
+          user = {
+            id: decodedToken.sub,
+            username: decodedToken.username,
+            role: decodedToken.role,
+          }
+        }
+      }
 
       if (refreshToken && accessToken) {
         try {
@@ -62,5 +84,14 @@ export class JwtRefreshGuard extends AuthGuard('jwt-refresh') {
     }
 
     return null
+  }
+
+  private extractTokensFromCookies(context: ExecutionContext) {
+    const request = context.switchToHttp().getRequest()
+    const tokens = request.cookies
+
+    console.log(request.cookies)
+
+    return tokens
   }
 }
