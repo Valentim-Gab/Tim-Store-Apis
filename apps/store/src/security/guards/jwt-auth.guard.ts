@@ -42,19 +42,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
           jwt.verify(token, this.config.get('secret'))
         } catch (error) {
           if (error instanceof jwt.TokenExpiredError) {
-            // if (!this.extractTokenFromAuthHeader(context)) {
-            //   const response = context.switchToHttp().getResponse()
-            //   const tokens = this.authService.jwtSign(user)
-
-            //   response.cookies.access_token = tokens.access_token
-            //   response.cookies.refresh_token = tokens.refresh_token
-            //   response.cookies.session = tokens.access_token
-
-            //   console.log('REFRESHED')
-
-            //   return response
-            // }
-
             throw new ForbiddenException(
               'Sessão expirada',
               ErrorConstants.SESSION_EXPIRED,
@@ -89,6 +76,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   private extractTokenFromCookies(context: ExecutionContext): string {
     const request = context.switchToHttp().getRequest()
+
     const token = request.cookies.access_token ?? null
 
     return token

@@ -9,6 +9,7 @@ import { LocalStrategy } from './strategies/local.strategy'
 import { JwtStrategy } from './strategies/jwt.strategy'
 import JwtRefreshStrategy from './strategies/jwt-refresh.stratey'
 import { ConfigService } from '@nestjs/config'
+import { AuthConstants } from 'src/constants/auth.constant'
 
 @Global()
 @Module({
@@ -18,7 +19,7 @@ import { ConfigService } from '@nestjs/config'
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => ({
         secret: config.get('secret'),
-        signOptions: { expiresIn: '30s' },
+        signOptions: { expiresIn: AuthConstants.ACCESS_TOKEN_EXPIRES },
       }),
       inject: [ConfigService],
     }),
