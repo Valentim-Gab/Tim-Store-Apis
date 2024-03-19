@@ -24,7 +24,7 @@ export class UserService {
     last_name: true,
     email: true,
     active: true,
-    cnpj: true,
+    cpf: true,
     date_birth: true,
     phone_number: true,
     role: true,
@@ -53,6 +53,7 @@ export class UserService {
           id: uuidv4(),
           ...createUserDto,
           password: encryptPassword,
+          date_birth: new Date(createUserDto.date_birth),
           role: [Role.User],
         }
 
