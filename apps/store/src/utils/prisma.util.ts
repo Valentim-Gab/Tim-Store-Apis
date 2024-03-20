@@ -20,9 +20,9 @@ export class PrismaUtil {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === ErrorConstants.UNIQUE_VIOLATED
       ) {
-        const uniqueColumn = error.meta.target[0]
+        const uniqueColumn = error.meta.target[0].toUpperCase()
 
-        throw new BadRequestException(`Campo "${uniqueColumn}" em uso!`)
+        throw new BadRequestException(`Campo ${uniqueColumn} em uso`)
       }
 
       console.error(error)
