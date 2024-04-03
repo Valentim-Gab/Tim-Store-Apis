@@ -8,6 +8,10 @@ import { UserService } from 'src/routers/user/user.service'
 import { Payload } from './auth.interface'
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard'
 import { Cookies } from 'src/decorators/cookies.decorator'
+import { Roles } from 'src/decorators/roles.decorator'
+import { Role } from 'src/enums/Role'
+import { JwtAuthGuard } from '../guards/jwt-auth.guard'
+import { RolesGuard } from '../guards/roles.guard'
 
 @Controller()
 export class AuthController {
@@ -21,15 +25,13 @@ export class AuthController {
   public login(@Res() res: Response, @ReqUser() user: users) {
     const tokens = this.authService.jwtSign(user)
 
-    res.cookie('access_token', tokens.access_token, {
-      httpOnly: true,
-      secure: true,
-    })
+    res.json({ user, tokens })
+  }
 
-    res.cookie('refresh_token', tokens.refresh_token, {
-      httpOnly: true,
-      secure: true,
-    })
+  @UseGuards(LocalAuthGuard)
+  @Post('/login-unique')
+  public loginUnique(@Res() res: Response, @ReqUser() user: users) {
+    const tokens = this.authService.jwtSignUnique(user)
 
     res.json({ user, tokens })
   }
@@ -42,13 +44,17 @@ export class AuthController {
     this.login(res, user)
   }
 
-  @Get('/logout')
-  public logout(@Res() res: Response, @Cookies('access_token') token: string) {
-    console.log(token)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User, Role.Admin)
+  @Get('logged')
+  async logged() {
+    return
+  }
 
-    res.clearCookie('refresh_token', { path: '/' })
-    res.clearCookie('access_token', { path: '/' })
-
-    res.json({ message: 'Logout' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User, Role.Admin)
+  @Get('test')
+  async test() {
+    return { message: 'Okay' }
   }
 }

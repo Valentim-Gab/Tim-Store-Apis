@@ -39,7 +39,24 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
       refresh_token: this.getRefreshToken(payload.sub),
-      expires: AuthConstants.ACCESS_TOKEN_MAX_AGE,
+    }
+  }
+
+  public jwtSignUnique(data: users): JwtSign {
+    const payload: JwtPayload = {
+      sub: data.id,
+      username: data.email,
+      role: data.role,
+    }
+
+    return {
+      token: this.jwtService.sign(payload, {
+        secret: this.config.get('secret'),
+        expiresIn: AuthConstants.UNIQUE_TOKEN_EXPIRES,
+      }),
+      expires: new Date().setTime(
+        new Date().getTime() + AuthConstants.UNIQUE_TOKEN_MAX_AGE * 1000,
+      ),
     }
   }
 
